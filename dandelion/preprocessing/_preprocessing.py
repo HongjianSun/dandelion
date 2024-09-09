@@ -5653,6 +5653,9 @@ class MarkAmbiguousContigs:
                 )
                 vj_p = list(data3["sequence_id"])
                 vj_umi_p = [int(x) for x in pd.to_numeric(data3["umi_count"])]
+                vj_con_p = [
+                    int(x) for x in pd.to_numeric(data3["consensus_count"])
+                ]
                 if len(vj_p) > 1:
                     if "sequence_alignment" in data3:
                         (
@@ -5670,9 +5673,13 @@ class MarkAmbiguousContigs:
                                 self.ambiguous_contigs.append(avj)
                     if len(vj_p) > 1:
                         vj_ccall_p_count = dict(data3["umi_count"])
+                        vj_ccall_c_count = dict(data3["consensus_count"])
                         # maximum keep 2?
                         vj_p, extra_vj, ambiguous_vj = check_productive_vj(
-                            vj_ccall_p_count
+                            vj_ccall_p_count,
+                            vj_ccall_c_count,
+                            umi_foldchange_cutoff,
+                            con_foldchange_cutoff,
                         )
                 if "ambiguous_vj" not in locals():
                     ambiguous_vj = []
@@ -5962,7 +5969,13 @@ def check_productive_vdj(
         elif (
             max_count >= 3 and max_count2 >= 10
         ):  # max_count2 acceptable count unknown, temp set to 10 --Sun240609
-            drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
+            drop_keys = [
+                k
+                for k in vdj_contigs.keys()
+                if vdj_contigs.get(k, 0) < max_count
+                or vdj_contigs2.get(k, 0) < max_count2
+            ]
+            # drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
             for dk in drop_keys:
                 extra_contigs.append(dk)
             for kk in max_id_keys:
@@ -5977,8 +5990,71 @@ def check_productive_vdj(
 
 
 def check_productive_vj(
-    vj_contigs: dict[str, int]
+    vj_contigs: dict[str, int],
+    vj_contigs2: dict[str, int],
+    umi_foldchange_cutoff: int | float,
+    con_foldchange_cutoff: int | float,
 ) -> tuple[list[str], list[str], list[str]]:
+    """Function to keep top two productive VJ chains because of allelic inclusion."""
+
+    keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
+
+    # Calculate max counts for both vj_contigs and vj_contigs2
+    max_count = max(vj_contigs.values())
+    max_count2 = max(vj_contigs2.values())
+
+    max_id_keys = [k for k, v in vj_contigs.items() if v == max_count]
+    max_id_keys2 = [k for k, v in vj_contigs2.items() if v == max_count2]
+
+    # Only proceed if both contigs have at least one maximum key
+    if len(max_id_keys) == 1 and len(max_id_keys2) == 1:
+        # Combine the keys from both vj_contigs and vj_contigs2
+        other_counts = {
+            k: (vj_contigs.get(k, 0), vj_contigs2.get(k, 0))
+            for k in set(vj_contigs) | set(vj_contigs2)
+            if k not in max_id_keys
+        }
+
+        # Apply umi_foldchange_cutoff and con_foldchange_cutoff
+        umi_test = {
+            i: ((max_count / j[0]) < umi_foldchange_cutoff)
+            or ((max_count2 / j[1]) < con_foldchange_cutoff)
+            for i, j in other_counts.items()
+        }
+
+        if any(umi_test.values()):
+            for dk in vj_contigs.keys():
+                ambiguous_contigs.append(dk)
+        elif (
+            max_count >= 3 and max_count2 >= 10
+        ):  # Example threshold for max_count2
+            # Drop keys considering both max_count and max_count2
+            drop_keys = [
+                k
+                for k in vj_contigs.keys()
+                if vj_contigs.get(k, 0) < max_count
+                or vj_contigs2.get(k, 0) < max_count2
+            ]
+            for dk in drop_keys:
+                extra_contigs.append(dk)
+            for kk in max_id_keys:
+                keep_contigs.append(kk)
+        else:
+            for dk in vj_contigs.keys():
+                ambiguous_contigs.append(dk)
+    else:
+        for dk in vj_contigs.keys():
+            ambiguous_contigs.append(dk)
+
+    return keep_contigs, extra_contigs, ambiguous_contigs
+
+
+def check_productive_vj_old(
+    vj_contigs: dict[str, int],
+    vj_contigs2: dict[str, int],
+    umi_foldchange_cutoff: int | float,
+    con_foldchange_cutoff: int | float,
+) -> tuple[List[str], list[str], list[str]]:
     """Function to keep top two productive vj chains because of allelic inclusions.
 
     Parameters
