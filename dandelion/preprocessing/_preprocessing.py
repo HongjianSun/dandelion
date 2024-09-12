@@ -5939,7 +5939,6 @@ def check_productive_vdj(
     con_foldchange_cutoff: int | float,
 ) -> tuple[list[str], list[str], list[str]]:
     """Keep top productive because of allelic exclusion."""
-    """add consensus_count(vdj_contigs2) and its logfoldchange--240906Sun"""
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
     counts = vdj_contigs.values()
     max_count = max(counts)
@@ -6054,13 +6053,20 @@ def check_productive_vj_old(
     vj_contigs2: dict[str, int],
     umi_foldchange_cutoff: int | float,
     con_foldchange_cutoff: int | float,
-) -> tuple[List[str], list[str], list[str]]:
-    """Function to keep top two productive vj chains because of allelic inclusions.
+) -> tuple[list[str], list[str], list[str]]:
+    """
+    Function to keep top two productive vj chains because of allelic inclusions.
 
     Parameters
     ----------
     vj_contigs : dict[str, int]
         dictionary of contigs with umi count.
+    vj_contigs2 : dict[str, int]
+        dictionary of contigs with consensus count.
+    umi_foldchange_cutoff : int | float
+        fold-change cut off for umi count.
+    con_foldchange_cutoff : int | float
+        fold-change cut off for consensus count.
 
     Returns
     -------
