@@ -5114,7 +5114,7 @@ def check_contigs(
     productive_only: bool = True,
     library_type: Optional[Literal["ig", "tr-ab", "tr-gd"]] = None,
     umi_foldchange_cutoff: int = 2,
-    con_foldchange_cutoff: int = 10,#consensus_count foldchange--Sun 240906
+    con_foldchange_cutoff: int = 10,  # consensus_count foldchange--Sun 240906
     filter_missing: bool = True,
     filter_extra: bool = False,
     save: Optional[str] = None,
@@ -5234,7 +5234,9 @@ def check_contigs(
         obs = pd.DataFrame(index=barcode)
         adata_ = ad.AnnData(obs=obs)
         adata_.obs["has_contig"] = "True"
-    contig_status = MarkAmbiguousContigs(dat, umi_foldchange_cutoff,con_foldchange_cutoff, verbose)#add con_foldchange_cutoff--Sun 240906
+    contig_status = MarkAmbiguousContigs(
+        dat, umi_foldchange_cutoff, con_foldchange_cutoff, verbose
+    )  # add con_foldchange_cutoff--Sun 240906
 
     ambigous = contig_status.ambiguous_contigs.copy()
     extra = contig_status.extra_contigs.copy()
@@ -5327,7 +5329,9 @@ class MarkAmbiguousContigs:
         self,
         data: pd.DataFrame,
         umi_foldchange_cutoff: Union[int, float],
-        con_foldchange_cutoff: Union[int, float],#add con_foldchange_cutoff--Sun 240906
+        con_foldchange_cutoff: Union[
+            int, float
+        ],  # add con_foldchange_cutoff--Sun 240906
         verbose: bool,
     ):
         """Init method for MarkAmbiguousContigs.
@@ -5391,7 +5395,9 @@ class MarkAmbiguousContigs:
                 )
                 vdj_p = list(data1["sequence_id"])
                 vdj_umi_p = [int(x) for x in pd.to_numeric(data1["umi_count"])]
-                vdj_con_p = [int(x) for x in pd.to_numeric(data1["consensus_count"])]
+                vdj_con_p = [
+                    int(x) for x in pd.to_numeric(data1["consensus_count"])
+                ]
                 vdj_ccall_p = list(data1["c_call"])
                 vdj_locus_p = list(data1["locus"])
                 if len(vdj_p) > 1:
@@ -5478,14 +5484,19 @@ class MarkAmbiguousContigs:
                                 ambiguous_vdj = ambiguous_igm + ambiguous_igd
                             else:
                                 vdj_ccall_p_count = dict(data1["umi_count"])
-                                vdj_ccall_c_count = dict(data1["consensus_count"])
+                                vdj_ccall_c_count = dict(
+                                    data1["consensus_count"]
+                                )
                                 if len(vdj_ccall_p_count) > 1:
                                     (
                                         vdj_p,
                                         extra_vdj,
                                         ambiguous_vdj,
                                     ) = check_productive_vdj(
-                                        vdj_ccall_p_count,vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff,
+                                        vdj_ccall_p_count,
+                                        vdj_ccall_c_count,
+                                        umi_foldchange_cutoff,
+                                        con_foldchange_cutoff,
                                     )
                                 else:
                                     vdj_p, extra_vdj, ambiguous_vdj = [], [], []
@@ -5495,13 +5506,17 @@ class MarkAmbiguousContigs:
                                     data1[data1["locus"] == "TRB"]["umi_count"]
                                 )
                                 vdj_locus_c_trb_count = dict(
-                                    data1[data1["locus"] == "TRB"]["consensus_count"]
+                                    data1[data1["locus"] == "TRB"][
+                                        "consensus_count"
+                                    ]
                                 )
                                 vdj_locus_p_trd_count = dict(
                                     data1[data1["locus"] == "TRD"]["umi_count"]
                                 )
                                 vdj_locus_c_trd_count = dict(
-                                    data1[data1["locus"] == "TRD"]["consensus_count"]
+                                    data1[data1["locus"] == "TRD"][
+                                        "consensus_count"
+                                    ]
                                 )
                                 if len(vdj_locus_p_trb_count) > 1:
                                     (
@@ -5530,7 +5545,7 @@ class MarkAmbiguousContigs:
                                         vdj_locus_p_trd_count,
                                         vdj_locus_p_trb_count,
                                         umi_foldchange_cutoff,
-                                        con_foldchange_cutoff
+                                        con_foldchange_cutoff,
                                     )
                                 else:
                                     keep_trd, extra_trd, ambiguous_trd = (
@@ -5544,27 +5559,37 @@ class MarkAmbiguousContigs:
                                 ambiguous_vdj = ambiguous_trb + ambiguous_trd
                             else:
                                 vdj_ccall_p_count = dict(data1["umi_count"])
-                                vdj_ccall_c_count = dict(data1["consensus_count"])#add vdj_ccall_c_count--Sun 240906
+                                vdj_ccall_c_count = dict(
+                                    data1["consensus_count"]
+                                )  # add vdj_ccall_c_count--Sun 240906
                                 if len(vdj_ccall_p_count) > 1:
                                     (
                                         vdj_p,
                                         extra_vdj,
                                         ambiguous_vdj,
                                     ) = check_productive_vdj(
-                                        vdj_ccall_p_count,vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff
+                                        vdj_ccall_p_count,
+                                        vdj_ccall_c_count,
+                                        umi_foldchange_cutoff,
+                                        con_foldchange_cutoff,
                                     )
                                 else:
                                     vdj_p, extra_vdj, ambiguous_vdj = [], [], []
                         else:
                             vdj_ccall_p_count = dict(data1["umi_count"])
-                            vdj_ccall_c_count = dict(data1["consensus_count"])#add vdj_ccall_c_count--Sun 240906
+                            vdj_ccall_c_count = dict(
+                                data1["consensus_count"]
+                            )  # add vdj_ccall_c_count--Sun 240906
                             if len(vdj_ccall_p_count) > 1:
                                 (
                                     vdj_p,
                                     extra_vdj,
                                     ambiguous_vdj,
                                 ) = check_productive_vdj(
-                                    vdj_ccall_p_count, vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff
+                                    vdj_ccall_p_count,
+                                    vdj_ccall_c_count,
+                                    umi_foldchange_cutoff,
+                                    con_foldchange_cutoff,
                                 )
                 if "ambiguous_vdj" not in locals():
                     ambiguous_vdj = []
@@ -5618,7 +5643,9 @@ class MarkAmbiguousContigs:
                 )
                 vj_p = list(data3["sequence_id"])
                 vj_umi_p = [int(x) for x in pd.to_numeric(data3["umi_count"])]
-                vj_con_p = [int(x) for x in pd.to_numeric(data3["consensus_count"])]
+                vj_con_p = [
+                    int(x) for x in pd.to_numeric(data3["consensus_count"])
+                ]
                 if len(vj_p) > 1:
                     if "sequence_alignment" in data3:
                         (
@@ -5642,7 +5669,7 @@ class MarkAmbiguousContigs:
                             vj_ccall_p_count,
                             vj_ccall_c_count,
                             umi_foldchange_cutoff,
-                            con_foldchange_cutoff
+                            con_foldchange_cutoff,
                         )
                 if "ambiguous_vj" not in locals():
                     ambiguous_vj = []
@@ -5896,7 +5923,12 @@ class MarkAmbiguousContigs:
 
 
 def check_productive_vdj(
-    vdj_contigs: Dict[str, int],vdj_contigs2: Dict[str, int], umi_foldchange_cutoff: Union[int, float],con_foldchange_cutoff: Union[int, float] #add con_foldchange_cutoff--Sun 240906
+    vdj_contigs: Dict[str, int],
+    vdj_contigs2: Dict[str, int],
+    umi_foldchange_cutoff: Union[int, float],
+    con_foldchange_cutoff: Union[
+        int, float
+    ],  # add con_foldchange_cutoff--Sun 240906
 ) -> Tuple[List[str], List[str], List[str]]:
     """Keep top productive because of allelic exclusion."""
     """add consensus_count(vdj_contigs2) and its logfoldchange--240906Sun"""
@@ -5909,25 +5941,33 @@ def check_productive_vdj(
     max_id_keys2 = [k for k, v in vdj_contigs2.items() if v == max_count2]
 
     if (len(max_id_keys) == 1) and (len(max_id_keys2) == 1):
-        other_counts = {k: (vdj_contigs.get(k, 0), vdj_contigs2.get(k, 0)) for k in set(vdj_contigs) | set(vdj_contigs2) if k != max_id_keys[0]}
-        #other_counts = {k: v for k, v in vdj_contigs.items() if k != max_id_keys[0]}
-        
+        other_counts = {
+            k: (vdj_contigs.get(k, 0), vdj_contigs2.get(k, 0))
+            for k in set(vdj_contigs) | set(vdj_contigs2)
+            if k != max_id_keys[0]
+        }
+        # other_counts = {k: v for k, v in vdj_contigs.items() if k != max_id_keys[0]}
+
         # Apply both umi_foldchange_cutoff and con_foldchange_cutoff to umi_test.
-        umi_test = {#the similar count. If not exist then only preserve the max count
-            i: ((max_count / j[0]) < umi_foldchange_cutoff) or ((max_count2 / j[1]) < con_foldchange_cutoff)
+        umi_test = {  # the similar count. If not exist then only preserve the max count
+            i: ((max_count / j[0]) < umi_foldchange_cutoff)
+            or ((max_count2 / j[1]) < con_foldchange_cutoff)
             for i, j in other_counts.items()
         }
 
-        
         if any(umi_test.values()):
             for dk in vdj_contigs.keys():
                 ambiguous_contigs.append(dk)
-        elif max_count >= 3 and max_count2 >= 10:#max_count2 acceptable count unknown, temp set to 10 --Sun240609
+        elif (
+            max_count >= 3 and max_count2 >= 10
+        ):  # max_count2 acceptable count unknown, temp set to 10 --Sun240609
             drop_keys = [
-                k for k in vdj_contigs.keys()
-                if vdj_contigs.get(k, 0) < max_count or vdj_contigs2.get(k, 0) < max_count2
+                k
+                for k in vdj_contigs.keys()
+                if vdj_contigs.get(k, 0) < max_count
+                or vdj_contigs2.get(k, 0) < max_count2
             ]
-            #drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
+            # drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
             for dk in drop_keys:
                 extra_contigs.append(dk)
             for kk in max_id_keys:
@@ -5940,16 +5980,17 @@ def check_productive_vdj(
             ambiguous_contigs.append(dk)
     return keep_contigs, extra_contigs, ambiguous_contigs
 
+
 def check_productive_vj(
     vj_contigs: Dict[str, int],
     vj_contigs2: Dict[str, int],
     umi_foldchange_cutoff: Union[int, float],
-    con_foldchange_cutoff: Union[int, float]
+    con_foldchange_cutoff: Union[int, float],
 ) -> Tuple[List[str], List[str], List[str]]:
     """Function to keep top two productive VJ chains because of allelic inclusion."""
-    
+
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
-    
+
     # Calculate max counts for both vj_contigs and vj_contigs2
     max_count = max(vj_contigs.values())
     max_count2 = max(vj_contigs2.values())
@@ -5965,21 +6006,26 @@ def check_productive_vj(
             for k in set(vj_contigs) | set(vj_contigs2)
             if k not in max_id_keys
         }
-        
+
         # Apply umi_foldchange_cutoff and con_foldchange_cutoff
         umi_test = {
-            i: ((max_count / j[0]) < umi_foldchange_cutoff) or ((max_count2 / j[1]) < con_foldchange_cutoff)
+            i: ((max_count / j[0]) < umi_foldchange_cutoff)
+            or ((max_count2 / j[1]) < con_foldchange_cutoff)
             for i, j in other_counts.items()
         }
 
         if any(umi_test.values()):
             for dk in vj_contigs.keys():
                 ambiguous_contigs.append(dk)
-        elif max_count >= 3 and max_count2 >= 10:  # Example threshold for max_count2
+        elif (
+            max_count >= 3 and max_count2 >= 10
+        ):  # Example threshold for max_count2
             # Drop keys considering both max_count and max_count2
             drop_keys = [
-                k for k in vj_contigs.keys()
-                if vj_contigs.get(k, 0) < max_count or vj_contigs2.get(k, 0) < max_count2
+                k
+                for k in vj_contigs.keys()
+                if vj_contigs.get(k, 0) < max_count
+                or vj_contigs2.get(k, 0) < max_count2
             ]
             for dk in drop_keys:
                 extra_contigs.append(dk)
@@ -5991,14 +6037,15 @@ def check_productive_vj(
     else:
         for dk in vj_contigs.keys():
             ambiguous_contigs.append(dk)
-    
+
     return keep_contigs, extra_contigs, ambiguous_contigs
+
 
 def check_productive_vj_old(
     vj_contigs: Dict[str, int],
-    vj_contigs2: Dict[str, int], 
+    vj_contigs2: Dict[str, int],
     umi_foldchange_cutoff: Union[int, float],
-    con_foldchange_cutoff: Union[int, float]
+    con_foldchange_cutoff: Union[int, float],
 ) -> Tuple[List[str], List[str], List[str]]:
     """Function to keep top two productive vj chains because of allelic inclusions.
 
