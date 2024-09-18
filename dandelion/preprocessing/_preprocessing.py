@@ -11,6 +11,7 @@ import pandas as pd
 
 from anndata import AnnData
 from Bio import Align
+from collections import OrderedDict
 from operator import countOf
 from pathlib import Path
 from plotnine import (
@@ -39,7 +40,7 @@ from scanpy import logging as logg
 from subprocess import run
 from time import sleep
 from tqdm import tqdm
-from typing import Literal
+from typing import Union, List, Tuple, Optional
 
 from dandelion.preprocessing.external._preprocessing import (
     assigngenes_igblast,
@@ -56,36 +57,36 @@ from dandelion.tools._tools import transfer
 
 
 def format_fasta(
-    fasta: Path | str,
-    prefix: str | None = None,
-    suffix: str | None = None,
-    sep: str | None = None,
+    fasta: Union[str, Path],
+    prefix: Optional[str] = None,
+    suffix: Optional[str] = None,
+    sep: Optional[str] = None,
     remove_trailing_hyphen_number: bool = True,
     high_confidence_filtering: bool = False,
-    out_dir: Path | str | None = None,
-    filename_prefix: str | None = None,
+    out_dir: Optional[Union[str, Path]] = None,
+    filename_prefix: Optional[str] = None,
 ):
     """
     Add prefix to the headers/contig ids in input fasta and annotation file.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file.
-    prefix : str | None, optional
+    prefix : Optional[str], optional
         prefix to append to the headers/contig ids.
-    suffix : str | None, optional
+    suffix : Optional[str], optional
         suffix to append to the headers/contig ids.
-    sep : str | None, optional
+    sep : Optional[str], optional
         separator after prefix or before suffix to append to the headers/contig ids.
     remove_trailing_hyphen_number : bool, optional
         whether or not to remove the trailing hyphen number e.g. '-1' from the
         cell/contig barcodes.
     high_confidence_filtering : bool, optional
         whether ot not to filter to only `high confidence` contigs.
-    out_dir : str | None, optional
+    out_dir : Optional[str], optional
         path to output location. `None` defaults to 'dandelion'.
-    filename_prefix : str | None, optional
+    filename_prefix : Optional[str], optional
         prefix of file name preceding '_contig'. `None` defaults to 'filtered'.
 
     Raises
@@ -294,27 +295,27 @@ def format_fasta(
 
 
 def format_fastas(
-    fastas: list[Path | str],
-    prefix: list[str] | None = None,
-    suffix: list[str] | None = None,
-    sep: str | None = None,
+    fastas: List[Union[str, Path]],
+    prefix: Optional[List[str]] = None,
+    suffix: Optional[List[str]] = None,
+    sep: Optional[str] = None,
     remove_trailing_hyphen_number: bool = True,
     high_confidence_filtering: bool = False,
-    out_dir: Path | str | None = None,
-    filename_prefix: list[str] | str | None = None,
+    out_dir: Optional[Union[str, Path]] = None,
+    filename_prefix: Optional[Union[List[str], str]] = None,
 ):
     """
     Add prefix to the headers/contig ids in input fasta and annotation file.
 
     Parameters
     ----------
-    fastas : list[Path | str]
+    fastas : List[Union[str, Path]]
         list of paths to fasta files.
-    prefix : list[str] | None, optional
+    prefix : Optional[List[str]], optional
         list of prefixes to append to headers/contig ids in each fasta file.
-    suffix : list[str] | None, optional
+    suffix : Optional[List[str]], optional
         list of suffixes to append to headers/contig ids in each fasta file.
-    sep : str | None, optional
+    sep : Optional[str], optional
         separator after prefix or before suffix to append to the headers/contig
         ids.
     remove_trailing_hyphen_number : bool, optional
@@ -322,9 +323,9 @@ def format_fastas(
         cell/contig barcodes.
     high_confidence_filtering : bool, optional
         whether ot not to filter to only `high confidence` contigs.
-    out_dir : Path | str | None, optional
+    out_dir : Optional[Union[str, Path]], optional
         path to out put location.
-    filename_prefix : list[str] | str | None, optional
+    filename_prefix : Optional[Union[List[str], str]], optional
         list of prefixes of file names preceding '_contig'. `None` defaults to
         'filtered'.
     """
@@ -408,25 +409,25 @@ def format_fastas(
 
 
 def assign_isotype(
-    fasta: Path | str,
+    fasta: Union[str, Path],
     org: Literal["human", "mouse"] = "human",
     evalue: float = 1e-4,
     correct_c_call: bool = True,
-    correction_dict: dict[str, dict[str, str]] | None = None,
+    correction_dict: Optional[Dict[str, Dict[str, str]]] = None,
     plot: bool = True,
     save_plot: bool = False,
     show_plot: bool = True,
-    figsize: tuple[float, float] = (4, 4),
-    blastdb: Path | str | None = None,
-    filename_prefix: str | None = None,
-    additional_args: list[str] = [],
+    figsize: Tuple[Union[int, float], Union[int, float]] = (4, 4),
+    blastdb: Optional[Union[str, Path]] = None,
+    filename_prefix: Optional[str] = None,
+    additional_args: List[str] = [],
 ):
     """
     Annotate contigs with constant region call using blastn.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file.
     org : Literal["human", "mouse"], optional
         organism of reference folder.
@@ -439,7 +440,7 @@ def assign_isotype(
     correct_c_call : bool, optional
         whether or not to adjust the c_calls after blast based on provided
         primers specified in `primer_dict` option.
-    correction_dict : dict[str, dict[str, str]] | None, optional
+    correction_dict : Optional[Union[Dict[str, str]]], optional
         a nested dictionary contain isotype/c_genes as keys and primer
         sequences as records to use for correcting annotated c_calls. Defaults
         to a curated dictionary for human sequences if left as none.
@@ -449,13 +450,13 @@ def assign_isotype(
         whether or not to save plot.
     show_plot : bool, optional
         whether or not to show plot.
-    figsize : tuple[float, float], optional
+    figsize : Tuple[Union[int, float], Union[int, float]], optional
         size of figure.
-    blastdb : Path | str | None, optional
+    blastdb : Optional[Union[str, Path]], optional
         path to blast database. Defaults to `$BLASTDB` environmental variable.
-    filename_prefix : str | None, optional
+    filename_prefix : Optional[str], optional
         prefix of file name preceding '_contig'. `None` defaults to 'filtered'.
-    additional_args : list[str], optional
+    additional_args : List[str], optional
         additional arguments to pass to `blastn`.
     Raises
     ------
@@ -465,48 +466,44 @@ def assign_isotype(
     aligner = Align.PairwiseAligner()
 
     def two_gene_correction(
-        df: pd.DataFrame, i: str, dictionary: dict[str, str]
+        self: pd.DataFrame, i: str, dictionary: Dict[str, str]
     ):
         """Pairwise alignment for two genes.
 
         Parameters
         ----------
-        df : pd.DataFrame
-            Input data frame.
         i : str
             index name.
-        dictionary : dict[str, str]
+        dictionary : Dict[str, str]
             dictionary holding gene name as key and sequence as value.
         """
         key1, key2 = dictionary.keys()
-        seq = df.loc[i, "c_sequence_alignment"].replace("-", "")
+        seq = self.loc[i, "c_sequence_alignment"].replace("-", "")
         alignments1 = aligner.align(dictionary[key1], seq)
         alignments2 = aligner.align(dictionary[key2], seq)
         score1 = alignments1.score
         score2 = alignments2.score
         if score1 == score2:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2)
         if score1 > score2:
-            df.at[i, "c_call"] = str(key1)
+            self.at[i, "c_call"] = str(key1)
         if score1 < score2:
-            df.at[i, "c_call"] = str(key2)
+            self.at[i, "c_call"] = str(key2)
 
     def three_gene_correction(
-        df: pd.DataFrame, i: str, dictionary: dict[str, str]
+        self: pd.DataFrame, i: str, dictionary: Dict[str, str]
     ):
         """Pairwise alignment for three genes.
 
         Parameters
         ----------
-        df : pd.DataFrame
-            Input data frame.
         i : str
             index name.
-        dictionary : dict[str, str]
+        dictionary : Dict[str, str]
             dictionary holding gene name as key and sequence as value.
         """
         key1, key2, key3 = dictionary.keys()
-        seq = df.loc[i, "c_sequence_alignment"].replace("-", "")
+        seq = self.loc[i, "c_sequence_alignment"].replace("-", "")
         alignments1 = aligner.align(dictionary[key1], seq)
         alignments2 = aligner.align(dictionary[key2], seq)
         alignments3 = aligner.align(dictionary[key3], seq)
@@ -514,36 +511,34 @@ def assign_isotype(
         score2 = alignments2.score
         score3 = alignments3.score
         if score1 == score2 == score3:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key3)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key3)
         elif score1 > score2 and score1 > score3:
-            df.at[i, "c_call"] = str(key1)
+            self.at[i, "c_call"] = str(key1)
         elif score2 > score1 and score2 > score3:
-            df.at[i, "c_call"] = str(key2)
+            self.at[i, "c_call"] = str(key2)
         elif score3 > score1 and score3 > score2:
-            df.at[i, "c_call"] = str(key3)
+            self.at[i, "c_call"] = str(key3)
         elif score1 == score2 and score1 > score3:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2)
         elif score1 > score2 and score1 == score3:
-            df.at[i, "c_call"] = str(key1) + "," + str(key3)
+            self.at[i, "c_call"] = str(key1) + "," + str(key3)
         elif score2 > score1 and score2 == score3:
-            df.at[i, "c_call"] = str(key2) + "," + str(key3)
+            self.at[i, "c_call"] = str(key2) + "," + str(key3)
 
     def four_gene_correction(
-        df: pd.DataFrame, i: str, dictionary: dict[str, str]
+        self: pd.DataFrame, i: str, dictionary: Dict[str, str]
     ):
         """Pairwise alignment for four genes.
 
         Parameters
         ----------
-        df : pd.DataFrame
-            Input data frame.
         i : str
             index name.
-        dictionary : dict[str, str]
+        dictionary : Dict[str, str]
             dictionary holding gene name as key and sequence as value.
         """
         key1, key2, key3, key4 = dictionary.keys()
-        seq = df.loc[i, "c_sequence_alignment"].replace("-", "")
+        seq = self.loc[i, "c_sequence_alignment"].replace("-", "")
         alignments1 = aligner.align(dictionary[key1], seq)
         alignments2 = aligner.align(dictionary[key2], seq)
         alignments3 = aligner.align(dictionary[key3], seq)
@@ -553,41 +548,41 @@ def assign_isotype(
         score3 = alignments3.score
         score4 = alignments4.score
         if score1 == score2 == score3 == score4:
-            df.at[i, "c_call"] = (
+            self.at[i, "c_call"] = (
                 str(key1) + "," + str(key2) + "," + str(key3) + "," + str(key4)
             )
         elif score1 > score2 and score1 > score3 and score1 > score4:
-            df.at[i, "c_call"] = str(key1)
+            self.at[i, "c_call"] = str(key1)
         elif score2 > score1 and score2 > score3 and score2 > score4:
-            df.at[i, "c_call"] = str(key2)
+            self.at[i, "c_call"] = str(key2)
         elif score3 > score1 and score3 > score2 and score3 > score4:
-            df.at[i, "c_call"] = str(key3)
+            self.at[i, "c_call"] = str(key3)
         elif score4 > score1 and score4 > score2 and score4 > score3:
-            df.at[i, "c_call"] = str(key4)
+            self.at[i, "c_call"] = str(key4)
         elif score1 == score2 and score1 > score3 and score1 > score4:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2)
         elif score1 > score2 and score1 == score3 and score1 > score4:
-            df.at[i, "c_call"] = str(key1) + "," + str(key3)
+            self.at[i, "c_call"] = str(key1) + "," + str(key3)
         elif score1 > score2 and score1 > score3 and score1 == score4:
-            df.at[i, "c_call"] = str(key1) + "," + str(key4)
+            self.at[i, "c_call"] = str(key1) + "," + str(key4)
         elif score2 == score3 and score2 > score1 and score2 > score4:
-            df.at[i, "c_call"] = str(key1) + "," + str(key3)
+            self.at[i, "c_call"] = str(key1) + "," + str(key3)
         elif score2 == score4 and score2 > score1 and score2 > score3:
-            df.at[i, "c_call"] = str(key2) + "," + str(key4)
+            self.at[i, "c_call"] = str(key2) + "," + str(key4)
         elif score3 == score4 and score3 > score1 and score3 > score2:
-            df.at[i, "c_call"] = str(key3) + "," + str(key4)
+            self.at[i, "c_call"] = str(key3) + "," + str(key4)
         elif score1 == score2 == score3 and score1 > score4:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key3)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key3)
         elif score1 == score2 == score4 and score1 > score3:
-            df.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key4)
+            self.at[i, "c_call"] = str(key1) + "," + str(key2) + "," + str(key4)
         elif score1 == score3 == score4 and score1 > score2:
-            df.at[i, "c_call"] = str(key1) + "," + str(key3) + "," + str(key4)
+            self.at[i, "c_call"] = str(key1) + "," + str(key3) + "," + str(key4)
         elif score2 == score3 == score4 and score2 > score1:
-            df.at[i, "c_call"] = str(key2) + "," + str(key3) + "," + str(key4)
+            self.at[i, "c_call"] = str(key2) + "," + str(key3) + "," + str(key4)
 
     def _correct_c_call(
         data: pd.DataFrame,
-        primers_dict: dict[str, dict[str, str]] | None = None,
+        primers_dict: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> pd.DataFrame:
         """Pairwise alignment for c genes.
 
@@ -595,7 +590,7 @@ def assign_isotype(
         ----------
         data : pd.DataFrame
             Input data Frame.
-        primers_dict : dict[str, dict[str, str]] | None, optional
+        primers_dict : Optional[Dict[str, Dict[str, str]]], optional
             Gene:Sequence dictionary to do pairwise alignment with.
 
         Returns
@@ -839,25 +834,25 @@ def assign_isotype(
 
 
 def assign_isotypes(
-    fastas: list[Path | str],
+    fastas: List[Union[str, Path]],
     org: Literal["human", "mouse"] = "human",
     evalue: float = 1e4,
     correct_c_call: bool = True,
-    correction_dict: dict[str, dict[str, str]] | None = None,
+    correction_dict: Optional[Dict[str, Dict[str, str]]] = None,
     plot: bool = True,
     save_plot: bool = False,
     show_plot: bool = True,
-    figsize: tuple[float, float] = (4, 4),
-    blastdb: Path | str | None = None,
-    filename_prefix: list[str] | str | None = None,
-    additional_args: list[str] = [],
+    figsize: Tuple[Union[int, float], Union[int, float]] = (4, 4),
+    blastdb: Optional[Union[str, Path]] = None,
+    filename_prefix: Optional[Union[List, str]] = None,
+    additional_args: List[str] = [],
 ):
     """
     Annotate contigs with constant region call using blastn.
 
     Parameters
     ----------
-    fastas : list[str]
+    fastas : List[str]
         list of paths to fasta files.
     org : Literal["human", "mouse"], optional
         organism of reference folder.
@@ -869,7 +864,7 @@ def assign_isotypes(
         sequence and the targets.
     correct_c_call : bool, optional
         whether or not to adjust the c_calls after blast based on provided primers specified in `primer_dict` option.
-    correction_dict : dict[str, dict[str, str]] | None, optional
+    correction_dict : Optional[Dict[str, Dict[str, str]]], optional
         a nested dictionary contain isotype/c_genes as keys and primer sequences as records to use for correcting
         annotated c_calls. Defaults to a curated dictionary for human sequences if left as none.
     plot : bool, optional
@@ -878,13 +873,13 @@ def assign_isotypes(
         whether or not to save plots.
     show_plot : bool, optional
         whether or not to show plots.
-    figsize : tuple[float, float], optional
+    figsize : Tuple[Union[int, float], Union[int, float]], optional
         size of figure.
-    blastdb : Path | str | None, optional
+    blastdb : Optional[Union[str, Path]], optional
         path to blast database. Defaults to `$BLASTDB` environmental variable.
-    filename_prefix : list[str] | str | None, optional
+    filename_prefix : Optional[Union[List, str]], optional
         list of prefixes of file names preceding '_contig'. `None` defaults to 'filtered'.
-    additional_args : list[str], optional
+    additional_args : List[str], optional
         additional arguments to pass to `blastn`.
     """
     if type(fastas) is not list:
@@ -914,13 +909,13 @@ def assign_isotypes(
 
 
 def reannotate_genes(
-    data: list[str],
-    igblast_db: str | None = None,
-    germline: str | None = None,
+    data: List[str],
+    igblast_db: Optional[str] = None,
+    germline: Optional[str] = None,
     org: Literal["human", "mouse"] = "human",
     loci: Literal["ig", "tr"] = "ig",
     extended: bool = True,
-    filename_prefix: list[str] | str | None = None,
+    filename_prefix: Optional[Union[List[str], str]] = None,
     flavour: Literal["strict", "original"] = "strict",
     min_j_match: int = 7,
     min_d_match: int = 9,
@@ -929,9 +924,9 @@ def reannotate_genes(
     j_evalue: float = 1e-4,
     reassign_dj: bool = True,
     overwrite: bool = True,
-    dust: str | None = "no",
-    db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    dust: Optional[Union[Literal["yes", "no"], str]] = "no",
+    db: Literal["imgt", "orgdb"] = "imgt",
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -956,9 +951,8 @@ def reannotate_genes(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
-    additional_args: dict[str, list[str]] = {
+    ] = None,
+    additional_args: Dict[str, List[str]] = {
         "assigngenes": [],
         "makedb": [],
         "igblastn": [],
@@ -971,14 +965,14 @@ def reannotate_genes(
 
     Parameters
     ----------
-    data : list[str]
+    data : List[str]
         list of fasta file locations, or folder name containing fasta files.
         if provided as a single string, it will first be converted to a list;
         this allows for the function to be run on single/multiple samples.
-    igblast_db : str | None, optional
+    igblast_db : Optional[str], optional
         path to igblast database folder. Defaults to `IGDATA` environmental
         variable.
-    germline : str | None, optional
+    germline : Optional[str], optional
         path to germline database folder. Defaults to `GERMLINE` environmental
         variable.
     org : Literal["human", "mouse"], optional
@@ -987,7 +981,7 @@ def reannotate_genes(
         mode for igblastn. 'ig' for BCRs, 'tr' for TCRs.
     extended : bool, optional
         whether or not to transfer additional 10X annotations to output file.
-    filename_prefix : list[str] | str | None, optional
+    filename_prefix : Optional[Union[List[str], str]], optional
         list of prefixes of file names preceding '_contig'. `None` defaults
         to 'filtered'.
     flavour : Literal["strict", "original"], optional
@@ -1028,16 +1022,16 @@ def reannotate_genes(
         whether or not to perform a targetted blastn reassignment for D and J genes.
     overwrite : bool, optional
         whether or not to overwrite the assignment if flavour = 'strict'.
-    dust : str | None, optional
+    dust : Optional[Union[Literal["yes", "no"], str]], optional
         dustmasker options. Filter query sequence with DUST
         Format: 'yes', or 'no' to disable. Accepts str.
         If None, defaults to `20 64 1`.
-    db : Literal["imgt", "ogrdb"], optional
+    db : Literal["imgt", "orgdb"], optional
         database to use for igblastn. Defaults to 'imgt'.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
-    additional_args : dict[str, list[str]], optional
+    additional_args : Dict[str, List[str]], optional
         additional arguments to pass to `AssignGenes.py`, `MakeDb.py`, `igblastn` and `blastn`.
         This accepts a dictionary with keys as the name of the sub-function (`assigngenes`, `makedb`,
         `igblastn`, `blastn_j` and `blastn_d`) and the records as lists of arguments to pass to the
@@ -1160,21 +1154,21 @@ def reannotate_genes(
 
 
 def return_pass_fail_filepaths(
-    fasta: Path | str,
-    filename_prefix: str | None = None,
-) -> tuple[Path, Path, Path]:
+    fasta: Union[str, Path],
+    filename_prefix: Optional[str] = None,
+) -> Tuple[Path, Path, Path]:
     """Return necessary file paths for internal use only.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file.
-    filename_prefix : str | None, optional
+    filename_prefix : Optional[str], optional
         prefix of file name preceding '_contig'. `None` defaults to 'filtered'.
 
     Returns
     -------
-    tuple[Path, Path, Path]
+    Tuple[Path, Path, Path]
         file paths for downstream functions.
 
     Raises
@@ -1204,7 +1198,7 @@ def return_pass_fail_filepaths(
 
 def ensure_columns_transferred(
     fasta: str,
-    filename_prefix: str | None = None,
+    filename_prefix: Optional[str] = None,
 ):
     """Ensure the additional columns are successfully populated.
 
@@ -1212,7 +1206,7 @@ def ensure_columns_transferred(
     ----------
     fasta : str
         path to fasta file.
-    filename_prefix : str | None, optional
+    filename_prefix : Optional[str], optional
         prefix of file name preceding '_contig'. `None` defaults to 'filtered'.
     """
     filePath, passfile, failfile = return_pass_fail_filepaths(
@@ -1264,13 +1258,13 @@ def ensure_columns_transferred(
 
 
 def reassign_alleles(
-    data: list[str],
+    data: List[str],
     combined_folder: str,
-    v_germline: str | None = None,
-    germline: str | None = None,
+    v_germline: Optional[str] = None,
+    germline: Optional[str] = None,
     org: Literal["human", "mouse"] = "human",
-    db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    db: Literal["imgt", "orgdb"] = "imgt",
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -1295,16 +1289,15 @@ def reassign_alleles(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
+    ] = None,
     novel: bool = True,
     plot: bool = True,
     save_plot: bool = False,
     show_plot: bool = True,
-    figsize: tuple[float, float] = (4, 3),
-    sample_id_dictionary: dict[str, str] | None = None,
-    filename_prefix: list[str] | str | None = None,
-    additional_args: dict[str, list[str]] = {
+    figsize: Tuple[Union[int, float], Union[int, float]] = (4, 3),
+    sample_id_dictionary: Optional[Dict[str, str]] = None,
+    filename_prefix: Optional[Union[List[str], str]] = None,
+    additional_args: Dict[str, List[str]] = {
         "tigger": [],
         "creategermlines": [],
     },
@@ -1317,23 +1310,23 @@ def reassign_alleles(
 
     Parameters
     ----------
-    data : list[str]
+    data : List[str]
         list of data folders containing the .tsv files. if provided as a single
         string, it will first be converted to a list; this allows for the
         function to be run on single/multiple samples.
     combined_folder : str
         name of folder for concatenated data file and genotyped files.
-    v_germline : str | None, optional
+    v_germline : Optional[str], optional
         path to heavy chain v germline fasta. Defaults to IGHV fasta in
         `$GERMLINE` environmental variable.
-    germline : str | None, optional
+    germline : Optional[str], optional
         path to germline database folder. `None` defaults to `GERMLINE` environmental
         variable.
     org : Literal["human", "mouse"], optional
         organism of germline database.
     db : Literal["imgt", "ogrdb"], optional
         database to use for germline sequences.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
     novel : bool, optional
@@ -1344,14 +1337,14 @@ def reassign_alleles(
         whether or not to save plot.
     show_plot : bool, optional
         whether or not to show plot.
-    figsize : tuple[float, float], optional
+    figsize : Tuple[Union[int, float], Union[int, float]], optional
         size of figure.
-    sample_id_dictionary : dict[str, str] | None, optional
+    sample_id_dictionary : Optional[Dict[str, str]], optional
         dictionary for creating a sample_id column in the concatenated file.
-    filename_prefix : list[str] | str | None, optional
+    filename_prefix : Optional[Union[List[str], str]], optional
         list of prefixes of file names preceding '_contig'. `None` defaults to
         'filtered'.
-    additional_args : dict[str, list[str]], optional
+    additional_args : Dict[str, List[str]], optional
         additional arguments to pass to `tigger-genotype.R` and `CreateGermlines.py`.
         This accepts a dictionary with keys as the name of the sub-function (`tigger` or `creategermlines`)
         and the records as lists of arguments to pass to the relevant scripts/tools.
@@ -1905,11 +1898,11 @@ def reassign_alleles(
 
 
 def create_germlines(
-    vdj_data: Dandelion | pd.DataFrame | str,
-    germline: str | None = None,
+    vdj_data: Union[Dandelion, pd.DataFrame, str],
+    germline: Optional[str] = None,
     org: Literal["human", "mouse"] = "human",
     db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -1934,34 +1927,33 @@ def create_germlines(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
-    genotyped_fasta: str | None = None,
-    additional_args: list[str] = [],
-    save: str | None = None,
+    ] = None,
+    genotyped_fasta: Optional[str] = None,
+    additional_args: List[str] = [],
+    save: Optional[str] = None,
 ) -> Dandelion:
     """
     Run CreateGermlines.py to reconstruct the germline V(D)J sequence.
 
     Parameters
     ----------
-    vdj_data : Dandelion | pd.DataFrame | str
+    vdj_data : Union[Dandelion, pd.DataFrame, str]
         `Dandelion` object, pandas `DataFrame` in changeo/airr format, or file path to changeo/airr
         file after clones have been determined.
-    germline : str | None, optional
+    germline : Optional[str], optional
         path to germline database folder. `None` defaults to  environmental variable.
     org : Literal["human", "mouse"], optional
         organism of germline database.
     db : Literal["imgt", "ogrdb"], optional
         `imgt` or `ogrdb` reference database.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
-    genotyped_fasta : str | None, optional
+    genotyped_fasta : Optional[str], optional
         location to corrected v genotyped fasta file.
-    additional_args : list[str], optional
+    additional_args : List[str], optional
         additional arguments to pass to `CreateGermlines.py.`
-    save : str | None, optional
+    save : Optional[str], optional
         if provided, saves to specified file path.
 
     Returns
@@ -2041,10 +2033,10 @@ def create_germlines(
 
 
 def filter_contigs(
-    data: Dandelion | pd.DataFrame | str,
-    adata: AnnData | None = None,
+    data: Union[Dandelion, pd.DataFrame, str],
+    adata: Optional[AnnData] = None,
     filter_contig: bool = True,
-    library_type: Literal["ig", "tr-ab", "tr-gd"] | None = None,
+    library_type: Optional[Literal["ig", "tr-ab", "tr-gd"]] = None,
     filter_rna: bool = False,
     filter_poorqualitycontig: bool = False,
     keep_highest_umi: bool = True,
@@ -2054,10 +2046,10 @@ def filter_contigs(
     filter_missing: bool = True,
     productive_only: bool = True,
     simple: bool = False,
-    save: Path | str | None = None,
+    save: Optional[Union[str, Path]] = None,
     verbose: bool = True,
     **kwargs,
-) -> tuple[Dandelion, AnnData]:
+) -> Tuple[Dandelion, AnnData]:
     """
     Filter doublets and poor quality cells and corresponding contigs based on provided V(D)J `DataFrame` and `AnnData`.
 
@@ -2075,13 +2067,13 @@ def filter_contigs(
 
     Parameters
     ----------
-    data : Dandelion | pd.DataFrame | str
+    data : Union[Dandelion, pd.DataFrame, str]
         V(D)J airr/changeo data to filter. Can be pandas `DataFrame` object or file path as string.
-    adata : AnnData | None, optional
+    adata : Optional[AnnData], optional
         AnnData object to filter. If not provided, will assume to keep all cells in the airr table.
     filter_contig : bool, optional
         If True, V(D)J `DataFrame` object returned will be filtered.
-    library_type : Literal["ig", "tr-ab", "tr-gd"] | None, optional
+    library_type : Optional[Literal["ig", "tr-ab", "tr-gd"]], optional
         if specified, it will first filter based on the expected type of contigs:
             `ig`:
                 IGH, IGK, IGL
@@ -2113,7 +2105,7 @@ def filter_contigs(
         whether or not to retain only productive contigs.
     simple : bool, optional
         simple filtering mode where only checks for potential gene assignment mismatches.
-    save : Path | str | None, optional
+    save : Optional[Union[str, Path]], optional
         Only used if a pandas data frame or dandelion object is provided. Specifying will save the formatted vdj table.
     verbose : bool, optional
         whether to print progress.
@@ -2122,7 +2114,7 @@ def filter_contigs(
 
     Returns
     -------
-    tuple[Dandelion, AnnData]
+    Tuple[Dandelion, AnnData]
         filtered dandelion V(D)J object and `AnnData` object.
 
     Raises
@@ -2203,7 +2195,7 @@ def filter_contigs(
     umi_adjustment = tofilter.umi_adjustment.copy()
 
     if len(umi_adjustment) > 0:
-        dat.update({"umi_count": umi_adjustment})
+        dat["umi_count"].update(umi_adjustment)
 
     poorqual = {c: "False" for c in adata_.obs_names}
     hdoublet = {c: "False" for c in adata_.obs_names}
@@ -2328,12 +2320,12 @@ def filter_contigs(
 
 
 def quantify_mutations(
-    data: Dandelion | str,
+    data: Union[Dandelion, str],
     split_locus: bool = False,
-    sequence_column: str | None = None,
-    germline_column: str | None = None,
-    region_definition: str | None = None,
-    mutation_definition: str | None = None,
+    sequence_column: Optional[str] = None,
+    germline_column: Optional[str] = None,
+    region_definition: Optional[str] = None,
+    mutation_definition: Optional[str] = None,
     frequency: bool = False,
     combine: bool = True,
     **kwargs,
@@ -2345,17 +2337,17 @@ def quantify_mutations(
 
     Parameters
     ----------
-    data : Dandelion | str
+    data : Union[Dandelion, str]
         `Dandelion` object, file path to AIRR file.
     split_locus : bool, optional
         whether to return the results for heavy chain and light chain separately.
-    sequence_column : str | None, optional
+    sequence_column : Optional[str], optional
         passed to shazam's `observedMutations`. https://shazam.readthedocs.io/en/stable/topics/observedMutations
-    germline_column : str | None, optional
+    germline_column : Optional[str], optional
         passed to shazam's `observedMutations`. https://shazam.readthedocs.io/en/stable/topics/observedMutations
-    region_definition : str | None, optional
+    region_definition : Optional[str], optional
         passed to shazam's `observedMutations`. https://shazam.readthedocs.io/en/stable/topics/IMGT_SCHEMES/
-    mutation_definition : str | None, optional
+    mutation_definition : Optional[str], optional
         passed to shazam's `observedMutations`. https://shazam.readthedocs.io/en/stable/topics/MUTATION_SCHEMES/
     frequency : bool, optional
         whether to return the results a frequency or counts.
@@ -2574,12 +2566,12 @@ def quantify_mutations(
 
 
 def calculate_threshold(
-    data: Dandelion | pd.DataFrame | str,
+    data: Union[Dandelion, pd.DataFrame, str],
     mode: Literal["single-cell", "heavy"] = "single-cell",
-    manual_threshold: float | None = None,
+    manual_threshold: Optional[float] = None,
     VJthenLen: bool = False,
     onlyHeavy: bool = False,
-    model: (
+    model: Optional[
         Literal[
             "ham",
             "aa",
@@ -2589,23 +2581,22 @@ def calculate_threshold(
             "hs1f_compat",
             "m1n_compat",
         ]
-        | None
-    ) = None,
-    normalize_method: Literal["len"] | None = None,
-    threshold_method: Literal["gmm", "density"] | None = None,
-    edge: float | None = None,
-    cross: list[float] | None = None,
-    subsample: int | None = None,
-    threshold_model: (
-        Literal["norm-norm", "norm-gamma", "gamma-norm", "gamma-gamma"] | None
-    ) = None,
-    cutoff: Literal["optimal", "intersect", "user"] | None = None,
-    sensitivity: float | None = None,
-    specificity: float | None = None,
+    ] = None,
+    normalize_method: Optional[Literal["len"]] = None,
+    threshold_method: Optional[Literal["gmm", "density"]] = None,
+    edge: Optional[float] = None,
+    cross: Optional[List[float]] = None,
+    subsample: Optional[int] = None,
+    threshold_model: Optional[
+        Literal["norm-norm", "norm-gamma", "gamma-norm", "gamma-gamma"]
+    ] = None,
+    cutoff: Optional[Literal["optimal", "intersect", "user"]] = None,
+    sensitivity: Optional[float] = None,
+    specificity: Optional[float] = None,
     plot: bool = True,
-    plot_group: str | None = None,
-    figsize: tuple[float, float] = (4.5, 2.5),
-    save_plot: str | None = None,
+    plot_group: Optional[str] = None,
+    figsize: Tuple[Union[int, float], Union[int, float]] = (4.5, 2.5),
+    save_plot: Optional[str] = None,
     ncpu: int = 1,
     **kwargs,
 ) -> Dandelion:
@@ -2628,12 +2619,12 @@ def calculate_threshold(
 
     Parameters
     ----------
-    data : Dandelion | pd.DataFrame | str
+    data : Union[Dandelion, pd.DataFrame, str]
         input `Danelion`, AIRR data as pandas DataFrame or path to file.
     mode : Literal["single-cell", "heavy"], optional
         accepts one of "heavy" or "single-cell".
         Refer to https://shazam.readthedocs.io/en/stable/vignettes/DistToNearest-Vignette.
-    manual_threshold : float | None, optional
+    manual_threshold : Optional[float], optional
         value to manually plot in histogram.
     VJthenLen : bool, optional
         logical value specifying whether to perform partitioning as a 2-stage process.
@@ -2645,39 +2636,39 @@ def calculate_threshold(
     onlyHeavy : bool, optional
         use only the IGH (BCR) or TRB/TRD (TCR) sequences for grouping. Only applicable to single-cell mode.
         See groupGenes for further details.
-    model : Literal["ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat", ] | None, optional
+    model : Optional[Literal["ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat", ]], optional
         underlying SHM model, which must be one of "ham","aa","hh_s1f","hh_s5f","mk_rs1nf","hs1f_compat","m1n_compat".
-    normalize_method : Literal["len"] | None, optional
+    normalize_method : Optional[Literal["len"]], optional
         method of normalization. The default is "len", which divides the distance by the length of the sequence group.
         If "none" then no normalization if performed.
-    threshold_method : Literal["gmm", "density"] | None, optional
+    threshold_method : Optional[Literal["gmm", "density"]], optional
         string defining the method to use for determining the optimal threshold. One of "gmm" or "density".
-    edge : float | None, optional
+    edge : Optional[float], optional
         upper range as a fraction of the data density to rule initialization of Gaussian fit parameters.
         Default value is 0.9 (or 90). Applies only when threshold_method="density".
-    cross : list[float] | None, optional
+    cross : Optional[List[float]], optional
         supplementary nearest neighbor distance vector output from distToNearest for initialization of the Gaussian fit
         parameters. Applies only when method="gmm".
-    subsample : int | None, optional
+    subsample : Optional[int], optional
         maximum number of distances to subsample to before threshold detection.
-    threshold_model : Literal["norm-norm", "norm-gamma", "gamma-norm", "gamma-gamma"] | None, optional
+    threshold_model : Optional[Literal["norm-norm", "norm-gamma", "gamma-norm", "gamma-gamma"]], optional
         allows the user to choose among four possible combinations of fitting curves: "norm-norm", "norm-gamma",
         "gamma-norm", and "gamma-gamma". Applies only when method="gmm".
-    cutoff : Literal["optimal", "intersect", "user"] | None, optional
+    cutoff : Optional[Literal["optimal", "intersect", "user"]], optional
         method to use for threshold selection: the optimal threshold "optimal", the intersection point of the two fitted
         curves "intersect", or a value defined by user for one of the sensitivity or specificity "user". Applies only
         when method="gmm".
-    sensitivity : float | None, optional
+    sensitivity : Optional[float], optional
         sensitivity required. Applies only when method="gmm" and cutoff="user".
-    specificity : float | None, optional
+    specificity : Optional[float], optional
         specificity required. Applies only when method="gmm" and cutoff="user".
     plot : bool, optional
         whether or not to return plot.
-    plot_group : str | None, optional
+    plot_group : Optional[str], optional
         determines the fill color and facets.
-    figsize : tuple[float, float], optional
+    figsize : Tuple[Union[int, float], Union[int, float]], optional
         size of plot.
-    save_plot : str | None, optional
+    save_plot : Optional[str], optional
         if specified, plot will be save with this path.
     ncpu : int, optional
         number of cpus to run `distToNearest`. defaults to 1.
@@ -2967,15 +2958,15 @@ class FilterContigs:
     ----------
     Cell : dandelion.utilities._utilities.Tree
         nested dictionary of cells.
-    drop_contig : list[str]
+    drop_contig : List[str]
         list of `sequence_id`s to drop.
-    h_doublet : list[str]
+    h_doublet : List[str]
         list of `sequence_id`s that are VDJ 'multiplets'.
-    l_doublet : list[str]
+    l_doublet : List[str]
         list of `sequence_id`s that are VJ 'multiplets'.
-    poor_qual : list[str]
+    poor_qual : List[str]
         list of `sequence_id`s that are VDJ 'multiplets'.
-    umi_adjustment : dict[str, int]
+    umi_adjustment : Dict[str, int]
         dictionary of `sequence_id`s with adjusted umi value.
     """
 
@@ -2983,7 +2974,7 @@ class FilterContigs:
         self,
         data: pd.DataFrame,
         keep_highest_umi: bool,
-        umi_foldchange_cutoff: int | float,
+        umi_foldchange_cutoff: Union[int, float],
         filter_poorqualitycontig: bool,
         filter_extra_vdj_chains: bool,
         filter_extra_vj_chains: bool,
@@ -2997,7 +2988,7 @@ class FilterContigs:
             AIRR data frame in Dandelion.data.
         keep_highest_umi : bool
             whether or not to keep highest UMI contig.
-        umi_foldchange_cutoff : int | float
+        umi_foldchange_cutoff : Union[int, float]
             fold-change cut off for decision.
         filter_poorqualitycontig : bool
             whether or not to flter poor quality contigs.
@@ -3765,15 +3756,15 @@ class FilterContigsLite:
     ----------
     Cell : dandelion.utilities._utilities.Tree
         nested dictionary of cells.
-    drop_contig : list[str]
+    drop_contig : List[str]
         list of `sequence_id`s to drop.
-    h_doublet : list[str]
+    h_doublet : List[str]
         list of `sequence_id`s that are VDJ 'multiplets'.
-    l_doublet : list[str]
+    l_doublet : List[str]
         list of `sequence_id`s that are VJ 'multiplets'.
-    poor_qual : list[str]
+    poor_qual : List[str]
         list of `sequence_id`s that are VDJ 'multiplets'.
-    umi_adjustment : dict[str, int]
+    umi_adjustment : Dict[str, int]
         dictionary of `sequence_id`s with adjusted umi value.
     """
 
@@ -4107,14 +4098,14 @@ class FilterContigsLite:
 
 
 def run_igblastn(
-    fasta: Path | str,
-    igblast_db: Path | str | None = None,
+    fasta: Union[str, Path],
+    igblast_db: Optional[Union[str, Path]] = None,
     org: Literal["human", "mouse"] = "human",
     loci: Literal["ig", "tr"] = "ig",
     evalue: float = 1e-4,
     min_d_match: int = 9,
     db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -4139,18 +4130,17 @@ def run_igblastn(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
-    additional_args: list[str] = [],
+    ] = None,
+    additional_args: List[str] = [],
 ):
     """
     Reannotate with IgBLASTn.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file for reannotation.
-    igblast_db : Path | str | None, optional
+    igblast_db : Optional[Union[str, Path]], optional
         path to igblast database.
     org : Literal["human", "mouse"], optional
         organism for germline sequences.
@@ -4166,10 +4156,10 @@ def run_igblastn(
         minimum D nucleotide match.
     db : Literal["imgt", "ogrdb"], optional
         database to use for germline sequences.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
-    additional_args: list[str], optional
+    additional_args: List[str], optional
         additional arguments to pass to `igblastn`.
     """
     env, igdb, fasta = set_igblast_env(igblast_db=igblast_db, input_file=fasta)
@@ -4265,23 +4255,23 @@ def run_igblastn(
 
 
 def assign_DJ(
-    fasta: Path | str,
+    fasta: Union[str, Path],
     org: Literal["human", "mouse"] = "human",
     loci: Literal["ig", "tr"] = "tr",
     call: Literal["d", "j"] = "j",
-    database: str | None = None,
+    database: Optional[str] = None,
     evalue: float = 1e-4,
     max_hsps: int = 10,
-    dust: str | None = None,
-    word_size: int | None = None,
+    dust: Optional[Union[Literal["yes", "no"], str]] = None,
+    word_size: Optional[int] = None,
     outfmt: str = (
         "6 qseqid sseqid pident length mismatch gapopen "
         + "qstart qend sstart send evalue bitscore qseq sseq"
     ),
-    filename_prefix: str | None = None,
+    filename_prefix: Optional[str] = None,
     overwrite: bool = False,
     db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -4306,16 +4296,15 @@ def assign_DJ(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
-    additional_args: list[str] = [],
+    ] = None,
+    additional_args: List[str] = [],
 ):
     """
     Annotate contigs with constant region call using blastn.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file.
     org : Literal["human", "mouse"], optional
         organism of reference folder.
@@ -4323,7 +4312,7 @@ def assign_DJ(
         locus. 'ig' or 'tr',
     call : Literal["d", "j"], optional
         Either 'd' of 'j' gene.
-    database : str | None, optional
+    database : Optional[str], optional
         path to database.
         Defaults to `IGDATA` environmental variable if v/d/j_call.
         Defaults to `BLASTDB` environmental variable if c_call.
@@ -4338,25 +4327,25 @@ def assign_DJ(
         The HSPs shown will be the best as judged by expect value. This number should
         be an integer that is one or greater. Setting it to one will show only the best
         HSP for every query-subject pair. Only affects the output file in the tmp folder.
-    dust : str | None, optional
+    dust : Optional[Union[Literal["yes", "no"], str]], optional
         dustmasker options. Filter query sequence with DUST
         Format: 'yes', or 'no' to disable. Accepts str.
         If None, defaults to `20 64 1`.
-    word_size : int | None, optional
+    word_size : Optional[int], optional
         Word size for wordfinder algorithm (length of best perfect match).
         Must be >=4. `None` defaults to 4.
     outfmt : str, optional
         specification of output format for blast.
-    filename_prefix : str | None, optional
+    filename_prefix : Optional[str], optional
         prefix of file name preceding '_contig'. `None` defaults to 'filtered'.
     overwrite : bool, optional
         whether or not to overwrite the assignments.
     db : Literal["imgt", "ogrdb"], optional
         database to use for germline sequences.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
-    additional_args: list[str], optional
+    additional_args: List[str], optional
         additional arguments to pass to `blastn`.
     """
     # main function from here
@@ -4394,8 +4383,8 @@ def assign_DJ(
 
 
 def run_blastn(
-    fasta: Path | str,
-    database: str | None,
+    fasta: Union[str, Path],
+    database: Optional[str],
     org: Literal["human", "mouse"] = "human",
     loci: Literal["ig", "tr"] = "ig",
     call: Literal["v", "d", "j", "c"] = "c",
@@ -4405,10 +4394,10 @@ def run_blastn(
         "6 qseqid sseqid pident length mismatch gapopen "
         + "qstart qend sstart send evalue bitscore qseq sseq"
     ),
-    dust: str | None = None,
-    word_size: int | None = None,
+    dust: Optional[Union[Literal["yes", "no"], str]] = None,
+    word_size: Optional[int] = None,
     db: Literal["imgt", "ogrdb"] = "imgt",
-    strain: (
+    strain: Optional[
         Literal[
             "c57bl6",
             "balbc",
@@ -4433,18 +4422,17 @@ def run_blastn(
             "PWD_PhJ",
             "SJL_J",
         ]
-        | None
-    ) = None,
-    additional_args: list[str] = [],
+    ] = None,
+    additional_args: List[str] = [],
 ) -> pd.DataFrame:
     """
     Annotate contigs using blastn.
 
     Parameters
     ----------
-    fasta : Path | str
+    fasta : Union[str, Path]
         path to fasta file.
-    database : str | None
+    database : Optional[str]
         path to database.
         Defaults to `IGDATA` environmental variable if v/d/j_call.
         Defaults to `BLASTDB` environmental variable if c_call.
@@ -4467,19 +4455,19 @@ def run_blastn(
         sequence and the targets.
     outfmt : str, optional
         blastn output format.
-    dust : str | None, optional
+    dust : Optional[Union[Literal["yes", "no"], str]], optional
         dustmasker options. Filter query sequence with DUST
         Format: 'yes', or 'no' to disable. Accepts str.
         If None, defaults to `20 64 1`.
-    word_size : int | None, optional
+    word_size : Optional[int], optional
         Word size for wordfinder algorithm (length of best perfect match).
         Must be >=4. `None` defaults to 4.
     db : Literal["imgt", "ogrdb"], optional
         database to use for germline sequences.
-    strain : Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"] | None, optional
+    strain : Optional[Literal["c57bl6", "balbc", "129S1_SvImJ", "AKR_J", "A_J", "BALB_c_ByJ", "BALB_c", "C3H_HeJ", "C57BL_6J", "C57BL_6", "CAST_EiJ", "CBA_J", "DBA_1J", "DBA_2J", "LEWES_EiJ", "MRL_MpJ", "MSM_MsJ", "NOD_ShiLtJ", "NOR_LtJ", "NZB_BlNJ", "PWD_PhJ", "SJL_J"]], optional
         strain of mouse to use for germline sequences. Only for `db="ogrdb"`. Note that only "c57bl6", "balbc", "CAST_EiJ", "LEWES_EiJ", "MSM_MsJ", "NOD_ShiLt_J" and "PWD_PhJ" contains both heavy chain and light chain germline sequences as a set.
         The rest will not allow igblastn and MakeDB.py to generate a successful airr table (check the failed file). "c57bl6" and "balbc" are merged databases of "C57BL_6" with "C57BL_6J" and "BALB_c" with "BALB_c_ByJ" respectively. None defaults to all combined.
-    additional_args: list[str], optional
+    additional_args: List[str], optional
         additional arguments to pass to `blastn`.
 
     Returns
@@ -5121,18 +5109,18 @@ def transfer_assignment(
 
 
 def check_contigs(
-    data: Dandelion | pd.DataFrame | str,
-    adata: AnnData | None = None,
+    data: Union[Dandelion, pd.DataFrame, str],
+    adata: Optional[AnnData] = None,
     productive_only: bool = True,
-    library_type: Literal["ig", "tr-ab", "tr-gd"] | None = None,
+    library_type: Optional[Literal["ig", "tr-ab", "tr-gd"]] = None,
     umi_foldchange_cutoff: int = 2,
-    con_foldchange_cutoff: int = 10,  # consensus_count foldchange--Sun 240906
+    con_foldchange_cutoff: int = 5,#consensus_count foldchange--Sun 240906
     filter_missing: bool = True,
     filter_extra: bool = False,
-    save: str | None = None,
+    save: Optional[str] = None,
     verbose: bool = True,
     **kwargs,
-) -> tuple[Dandelion, AnnData]:
+) -> Tuple[Dandelion, AnnData]:
     """
     Check contigs for whether they can be considered as ambiguous or not.
 
@@ -5160,14 +5148,14 @@ def check_contigs(
 
     Parameters
     ----------
-    data : Dandelion | pd.DataFrame | str
+    data : Union[Dandelion, pd.DataFrame, str]
         V(D)J AIRR data to check. Can be `Dandelion`, pandas `DataFrame` and file path to AIRR `.tsv` file.
-    adata : AnnData | None, optional
+    adata : Optional[AnnData], optional
         AnnData object to filter. If not provided, it will assume to keep all cells in the airr table and just return a
         Dandelion object.
     productive_only : bool, optional
         whether or not to retain only productive contigs.
-    library_type : Literal["ig", "tr-ab", "tr-gd"] | None, optional
+    library_type : Optional[Literal["ig", "tr-ab", "tr-gd"]], optional
         if specified, it will first filter based on the expected type of contigs:
             `ig`:
                 IGH, IGK, IGL
@@ -5182,7 +5170,7 @@ def check_contigs(
         cells in V(D)J data not found in `AnnData` object will removed from the dandelion object.
     filter_extra : bool, optional
         whether or not to remove contigs that are marked as extra.
-    save : str | None, optional
+    save : Optional[str], optional
         Only used if a pandas data frame or dandelion object is provided. Specifying will save the formatted vdj table
         with a `_checked.tsv` suffix extension.
     verbose : bool, optional
@@ -5192,7 +5180,7 @@ def check_contigs(
 
     Returns
     -------
-    tuple[Dandelion, AnnData]
+    Tuple[Dandelion, AnnData]
         checked dandelion V(D)J object and `AnnData` object.
 
     Raises
@@ -5246,9 +5234,7 @@ def check_contigs(
         obs = pd.DataFrame(index=barcode)
         adata_ = ad.AnnData(obs=obs)
         adata_.obs["has_contig"] = "True"
-    contig_status = MarkAmbiguousContigs(
-        dat, umi_foldchange_cutoff, con_foldchange_cutoff, verbose
-    )  # add con_foldchange_cutoff--Sun 240906
+    contig_status = MarkAmbiguousContigs(dat, umi_foldchange_cutoff,con_foldchange_cutoff, verbose)#add con_foldchange_cutoff--Sun 240906
 
     ambigous = contig_status.ambiguous_contigs.copy()
     extra = contig_status.extra_contigs.copy()
@@ -5329,19 +5315,19 @@ class MarkAmbiguousContigs:
 
     Attributes
     ----------
-    ambiguous_contigs : list[str]
+    ambiguous_contigs : List[str]
         list of `sequence_id`s that are ambiguous.
     Cell : dandelion.utilities._utilities.Tree
         nested dictionary of cells.
-    umi_adjustment : dict[str, int]
+    umi_adjustment : Dict[str, int]
         dictionary of `sequence_id`s with adjusted umi value.
     """
 
     def __init__(
         self,
         data: pd.DataFrame,
-        umi_foldchange_cutoff: int | float,
-        con_foldchange_cutoff: int | float,
+        umi_foldchange_cutoff: Union[int, float],
+        con_foldchange_cutoff: Union[int, float],#add con_foldchange_cutoff--Sun 240906
         verbose: bool,
     ):
         """Init method for MarkAmbiguousContigs.
@@ -5350,7 +5336,7 @@ class MarkAmbiguousContigs:
         ----------
         data : pd.DataFrame
             AIRR data frame in Dandelion.data.
-        umi_foldchange_cutoff : int | float
+        umi_foldchange_cutoff : Union[int, float]
             fold-change cut off for decision.
         verbose : bool
             whether or not to print progress.
@@ -5405,9 +5391,7 @@ class MarkAmbiguousContigs:
                 )
                 vdj_p = list(data1["sequence_id"])
                 vdj_umi_p = [int(x) for x in pd.to_numeric(data1["umi_count"])]
-                vdj_con_p = [
-                    int(x) for x in pd.to_numeric(data1["consensus_count"])
-                ]
+                vdj_con_p = [int(x) for x in pd.to_numeric(data1["consensus_count"])]
                 vdj_ccall_p = list(data1["c_call"])
                 vdj_locus_p = list(data1["locus"])
                 if len(vdj_p) > 1:
@@ -5462,6 +5446,7 @@ class MarkAmbiguousContigs:
                                         ambiguous_igm,
                                     ) = check_productive_vdj(
                                         vdj_ccall_p_igm_count,
+                                        vdj_ccall_c_igm_count,
                                         umi_foldchange_cutoff,
                                         con_foldchange_cutoff,
                                     )
@@ -5479,6 +5464,7 @@ class MarkAmbiguousContigs:
                                         ambiguous_igd,
                                     ) = check_productive_vdj(
                                         vdj_ccall_p_igd_count,
+                                        vdj_ccall_c_igd_count,
                                         umi_foldchange_cutoff,
                                         con_foldchange_cutoff,
                                     )
@@ -5494,19 +5480,14 @@ class MarkAmbiguousContigs:
                                 ambiguous_vdj = ambiguous_igm + ambiguous_igd
                             else:
                                 vdj_ccall_p_count = dict(data1["umi_count"])
-                                vdj_ccall_c_count = dict(
-                                    data1["consensus_count"]
-                                )
+                                vdj_ccall_c_count = dict(data1["consensus_count"])
                                 if len(vdj_ccall_p_count) > 1:
                                     (
                                         vdj_p,
                                         extra_vdj,
                                         ambiguous_vdj,
                                     ) = check_productive_vdj(
-                                        vdj_ccall_p_count,
-                                        vdj_ccall_c_count,
-                                        umi_foldchange_cutoff,
-                                        con_foldchange_cutoff,
+                                        vdj_ccall_p_count,vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff,
                                     )
                                 else:
                                     vdj_p, extra_vdj, ambiguous_vdj = [], [], []
@@ -5516,17 +5497,13 @@ class MarkAmbiguousContigs:
                                     data1[data1["locus"] == "TRB"]["umi_count"]
                                 )
                                 vdj_locus_c_trb_count = dict(
-                                    data1[data1["locus"] == "TRB"][
-                                        "consensus_count"
-                                    ]
+                                    data1[data1["locus"] == "TRB"]["consensus_count"]
                                 )
                                 vdj_locus_p_trd_count = dict(
                                     data1[data1["locus"] == "TRD"]["umi_count"]
                                 )
                                 vdj_locus_c_trd_count = dict(
-                                    data1[data1["locus"] == "TRD"][
-                                        "consensus_count"
-                                    ]
+                                    data1[data1["locus"] == "TRD"]["consensus_count"]
                                 )
                                 if len(vdj_locus_p_trb_count) > 1:
                                     (
@@ -5553,9 +5530,9 @@ class MarkAmbiguousContigs:
                                         ambiguous_trd,
                                     ) = check_productive_vdj(
                                         vdj_locus_p_trd_count,
-                                        vdj_locus_p_trb_count,
+                                        vdj_locus_c_trd_count,
                                         umi_foldchange_cutoff,
-                                        con_foldchange_cutoff,
+                                        con_foldchange_cutoff
                                     )
                                 else:
                                     keep_trd, extra_trd, ambiguous_trd = (
@@ -5569,37 +5546,27 @@ class MarkAmbiguousContigs:
                                 ambiguous_vdj = ambiguous_trb + ambiguous_trd
                             else:
                                 vdj_ccall_p_count = dict(data1["umi_count"])
-                                vdj_ccall_c_count = dict(
-                                    data1["consensus_count"]
-                                )  # add vdj_ccall_c_count--Sun 240906
+                                vdj_ccall_c_count = dict(data1["consensus_count"])#add vdj_ccall_c_count--Sun 240906
                                 if len(vdj_ccall_p_count) > 1:
                                     (
                                         vdj_p,
                                         extra_vdj,
                                         ambiguous_vdj,
                                     ) = check_productive_vdj(
-                                        vdj_ccall_p_count,
-                                        vdj_ccall_c_count,
-                                        umi_foldchange_cutoff,
-                                        con_foldchange_cutoff,
+                                        vdj_ccall_p_count,vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff
                                     )
                                 else:
                                     vdj_p, extra_vdj, ambiguous_vdj = [], [], []
                         else:
                             vdj_ccall_p_count = dict(data1["umi_count"])
-                            vdj_ccall_c_count = dict(
-                                data1["consensus_count"]
-                            )  # add vdj_ccall_c_count--Sun 240906
+                            vdj_ccall_c_count = dict(data1["consensus_count"])#add vdj_ccall_c_count--Sun 240906
                             if len(vdj_ccall_p_count) > 1:
                                 (
                                     vdj_p,
                                     extra_vdj,
                                     ambiguous_vdj,
                                 ) = check_productive_vdj(
-                                    vdj_ccall_p_count,
-                                    vdj_ccall_c_count,
-                                    umi_foldchange_cutoff,
-                                    con_foldchange_cutoff,
+                                    vdj_ccall_p_count, vdj_ccall_c_count, umi_foldchange_cutoff,con_foldchange_cutoff
                                 )
                 if "ambiguous_vdj" not in locals():
                     ambiguous_vdj = []
@@ -5653,9 +5620,7 @@ class MarkAmbiguousContigs:
                 )
                 vj_p = list(data3["sequence_id"])
                 vj_umi_p = [int(x) for x in pd.to_numeric(data3["umi_count"])]
-                vj_con_p = [
-                    int(x) for x in pd.to_numeric(data3["consensus_count"])
-                ]
+                vj_con_p = [int(x) for x in pd.to_numeric(data3["consensus_count"])]
                 if len(vj_p) > 1:
                     if "sequence_alignment" in data3:
                         (
@@ -5677,9 +5642,9 @@ class MarkAmbiguousContigs:
                         # maximum keep 2?
                         vj_p, extra_vj, ambiguous_vj = check_productive_vj(
                             vj_ccall_p_count,
-                            vj_ccall_c_count,
-                            umi_foldchange_cutoff,
-                            con_foldchange_cutoff,
+                            #vj_ccall_c_count,
+                            #umi_foldchange_cutoff,
+                            #con_foldchange_cutoff
                         )
                 if "ambiguous_vj" not in locals():
                     ambiguous_vj = []
@@ -5933,12 +5898,10 @@ class MarkAmbiguousContigs:
 
 
 def check_productive_vdj(
-    vdj_contigs: dict[str, int],
-    vdj_contigs2: dict[str, int],
-    umi_foldchange_cutoff: int | float,
-    con_foldchange_cutoff: int | float,
-) -> tuple[list[str], list[str], list[str]]:
+    vdj_contigs: Dict[str, int],vdj_contigs2: Dict[str, int], umi_foldchange_cutoff: Union[int, float],con_foldchange_cutoff: Union[int, float] #add con_foldchange_cutoff--Sun 240906
+) -> Tuple[List[str], List[str], List[str]]:
     """Keep top productive because of allelic exclusion."""
+    """add consensus_count(vdj_contigs2) and its logfoldchange--240906Sun"""
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
     counts = vdj_contigs.values()
     max_count = max(counts)
@@ -5948,33 +5911,27 @@ def check_productive_vdj(
     max_id_keys2 = [k for k, v in vdj_contigs2.items() if v == max_count2]
 
     if (len(max_id_keys) == 1) and (len(max_id_keys2) == 1):
-        other_counts = {
-            k: (vdj_contigs.get(k, 0), vdj_contigs2.get(k, 0))
-            for k in set(vdj_contigs) | set(vdj_contigs2)
-            if k != max_id_keys[0]
-        }
-        # other_counts = {k: v for k, v in vdj_contigs.items() if k != max_id_keys[0]}
-
-        # Apply both umi_foldchange_cutoff and con_foldchange_cutoff to umi_test
-        umi_test = {
-            i: ((max_count / j[0]) < umi_foldchange_cutoff)
-            or ((max_count2 / j[1]) < con_foldchange_cutoff)
+        other_counts = {k: (vdj_contigs.get(k, 0), vdj_contigs2.get(k, 0)) for k in set(vdj_contigs) | set(vdj_contigs2) if k != max_id_keys[0]}
+        #other_counts = {k: v for k, v in vdj_contigs.items() if k != max_id_keys[0]}
+        
+        # Apply both umi_foldchange_cutoff and con_foldchange_cutoff to umi_test.
+        umi_test = {#the similar count. If not exist then only preserve the max count
+            i: ((max_count / j[0]) < umi_foldchange_cutoff) or ((max_count2 / j[1]) < con_foldchange_cutoff)
             for i, j in other_counts.items()
         }
 
+        
         if any(umi_test.values()):
             for dk in vdj_contigs.keys():
                 ambiguous_contigs.append(dk)
-        elif (
-            max_count >= 3 and max_count2 >= 10
-        ):  # max_count2 acceptable count unknown, temp set to 10 --Sun240609
+                print(dk)
+                print('umi_test is not zero!')
+        elif max_count >= 3 and max_count2 >= 10:#max_count2 acceptable count unknown, temp set to 10 --Sun240609
             drop_keys = [
-                k
-                for k in vdj_contigs.keys()
-                if vdj_contigs.get(k, 0) < max_count
-                or vdj_contigs2.get(k, 0) < max_count2
+                k for k in vdj_contigs.keys()
+                if vdj_contigs.get(k, 0) < max_count or vdj_contigs2.get(k, 0) < max_count2
             ]
-            # drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
+            #drop_keys = [k for k, v in vdj_contigs.items() if v < max_count]
             for dk in drop_keys:
                 extra_contigs.append(dk)
             for kk in max_id_keys:
@@ -5982,22 +5939,25 @@ def check_productive_vdj(
         else:
             for dk in vdj_contigs.keys():
                 ambiguous_contigs.append(dk)
+                print(dk)
+                print('max_count < 3 or max_count2 >= 10!')
     else:
         for dk in vdj_contigs.keys():
             ambiguous_contigs.append(dk)
+            print(dk)
+            print('max_id_keys is not one!')
     return keep_contigs, extra_contigs, ambiguous_contigs
 
-
-def check_productive_vj(
-    vj_contigs: dict[str, int],
-    vj_contigs2: dict[str, int],
-    umi_foldchange_cutoff: int | float,
-    con_foldchange_cutoff: int | float,
-) -> tuple[list[str], list[str], list[str]]:
+def check_productive_vj_new(
+    vj_contigs: Dict[str, int],#umi
+    vj_contigs2: Dict[str, int],#consensus
+    umi_foldchange_cutoff: Union[int, float],
+    con_foldchange_cutoff: Union[int, float]
+) -> Tuple[List[str], List[str], List[str]]:
     """Function to keep top two productive VJ chains because of allelic inclusion."""
-
+    
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
-
+    
     # Calculate max counts for both vj_contigs and vj_contigs2
     max_count = max(vj_contigs.values())
     max_count2 = max(vj_contigs2.values())
@@ -6013,26 +5973,21 @@ def check_productive_vj(
             for k in set(vj_contigs) | set(vj_contigs2)
             if k not in max_id_keys
         }
-
+        
         # Apply umi_foldchange_cutoff and con_foldchange_cutoff
         umi_test = {
-            i: ((max_count / j[0]) < umi_foldchange_cutoff)
-            or ((max_count2 / j[1]) < con_foldchange_cutoff)
+            i: ((max_count / j[0]) < umi_foldchange_cutoff) or ((max_count2 / j[1]) < con_foldchange_cutoff)
             for i, j in other_counts.items()
         }
 
         if any(umi_test.values()):
             for dk in vj_contigs.keys():
                 ambiguous_contigs.append(dk)
-        elif (
-            max_count >= 3 and max_count2 >= 10
-        ):  # Example threshold for max_count2
+        elif max_count >= 3 and max_count2 >= 10:  # Example threshold for max_count2
             # Drop keys considering both max_count and max_count2
             drop_keys = [
-                k
-                for k in vj_contigs.keys()
-                if vj_contigs.get(k, 0) < max_count
-                or vj_contigs2.get(k, 0) < max_count2
+                k for k in vj_contigs.keys()
+                if vj_contigs.get(k, 0) < max_count or vj_contigs2.get(k, 0) < max_count2
             ]
             for dk in drop_keys:
                 extra_contigs.append(dk)
@@ -6044,33 +5999,22 @@ def check_productive_vj(
     else:
         for dk in vj_contigs.keys():
             ambiguous_contigs.append(dk)
-
+    
     return keep_contigs, extra_contigs, ambiguous_contigs
 
-
-def check_productive_vj_old(
-    vj_contigs: dict[str, int],
-    vj_contigs2: dict[str, int],
-    umi_foldchange_cutoff: int | float,
-    con_foldchange_cutoff: int | float,
-) -> tuple[list[str], list[str], list[str]]:
-    """
-    Function to keep top two productive vj chains because of allelic inclusions.
+def check_productive_vj(
+    vj_contigs: Dict[str, int],
+) -> Tuple[List[str], List[str], List[str]]:
+    """Function to keep top two productive vj chains because of allelic inclusions.
 
     Parameters
     ----------
-    vj_contigs : dict[str, int]
+    vj_contigs : Dict[str, int]
         dictionary of contigs with umi count.
-    vj_contigs2 : dict[str, int]
-        dictionary of contigs with consensus count.
-    umi_foldchange_cutoff : int | float
-        fold-change cut off for umi count.
-    con_foldchange_cutoff : int | float
-        fold-change cut off for consensus count.
 
     Returns
     -------
-    tuple[list[str], list[str], list[str]]
+    Tuple[List[str], List[str], List[str]]
         lists of contigs to keep, are extra or are ambiguous.
     """
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
@@ -6109,8 +6053,8 @@ def check_productive_vj_old(
 
 def check_update_same_seq(
     data: pd.DataFrame,
-) -> tuple[
-    pd.DataFrame, list[str], list[int], list[str], dict[str, int], list[str]
+) -> Tuple[
+    pd.DataFrame, List[str], List[int], List[str], Dict[str, int], List[str]
 ]:
     """Check if sequences are the same.
 
@@ -6121,7 +6065,7 @@ def check_update_same_seq(
 
     Returns
     -------
-    tuple[pd.DataFrame, list[str], list[int], list[str], dict[str, int], list[str]]
+    Tuple[pd.DataFrame, List[str], List[int], List[str], Dict[str, int], List[str]]
         updated  AIRR data frame, lists of contigs to keep, their umi counts, their c_calls,
         adjusted umi counts, and list of ambiguous contigs.
     """
@@ -6197,7 +6141,7 @@ def check_update_same_seq(
 
 def choose_segments(
     starts: pd.Series, ends: pd.Series, scores: pd.Series
-) -> list[str]:
+) -> List[str]:
     """Choose left most segment
 
     Parameters
@@ -6211,7 +6155,7 @@ def choose_segments(
 
     Returns
     -------
-    list[str]
+    List[str]
         list of chosen segments.
     """
     starts = np.array(starts)
@@ -6306,14 +6250,14 @@ def multimapper(filename: str) -> pd.DataFrame:
     return mapped
 
 
-def update_j_multimap(data: list[str], filename_prefix: list[str]):
+def update_j_multimap(data: List[str], filename_prefix: List[str]):
     """Update j multimapper call.
 
     Parameters
     ----------
-    data : list[str]
+    data : List[str]
         input folders.
-    filename_prefix : list[str]
+    filename_prefix : List[str]
         prefixes to append to front of files.
     """
     if not isinstance(data, list):
@@ -6397,15 +6341,9 @@ def update_j_multimap(data: list[str], filename_prefix: list[str]):
                         ].split(";")
                         if len(jmmappers) > 1:
                             dbfail.at[i, "j_call"] = jmmappers[0]
-                            dbfail.at[i, "j_sequence_start"] = float(
-                                jmmappersstart[0]
-                            )
-                            dbfail.at[i, "j_sequence_end"] = float(
-                                jmmappersend[0]
-                            )
-                            dbfail.at[i, "j_support"] = float(
-                                jmmapperssupport[0]
-                            )
+                            dbfail.at[i, "j_sequence_start"] = jmmappersstart[0]
+                            dbfail.at[i, "j_sequence_end"] = jmmappersend[0]
+                            dbfail.at[i, "j_support"] = jmmapperssupport[0]
                 write_airr(dbfail, filePath2)
             if filePath3 is not None:
                 dball = load_data(filePath3)
@@ -6427,15 +6365,9 @@ def update_j_multimap(data: list[str], filename_prefix: list[str]):
                         ].split(";")
                         if len(jmmappers) > 1:
                             dball.at[i, "j_call"] = jmmappers[0]
-                            dball.at[i, "j_sequence_start"] = float(
-                                jmmappersstart[0]
-                            )
-                            dball.at[i, "j_sequence_end"] = float(
-                                jmmappersend[0]
-                            )
-                            dball.at[i, "j_support"] = float(
-                                jmmapperssupport[0]
-                            )
+                            dball.at[i, "j_sequence_start"] = jmmappersstart[0]
+                            dball.at[i, "j_sequence_end"] = jmmappersend[0]
+                            dball.at[i, "j_support"] = jmmapperssupport[0]
                 write_airr(dball, filePath3)
             if filePath4 is not None:
                 dandy = load_data(filePath4)
