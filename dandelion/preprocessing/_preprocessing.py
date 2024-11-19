@@ -5680,7 +5680,6 @@ class MarkAmbiguousContigs:
                     if len(vj_p) > 1:
                         vj_ccall_p_count = dict(data3["umi_count"])
                         vj_ccall_c_count = dict(data3["consensus_count"])
-                        vj_ccall_c_count = dict(data3["consensus_count"])
                         # maximum keep 2?
                         vj_p, extra_vj, ambiguous_vj = check_productive_vj(
                             vj_ccall_p_count,
@@ -5948,8 +5947,6 @@ def check_productive_vdj(
     ],  # add con_foldchange_cutoff--Sun 240906
 ) -> Tuple[List[str], List[str], List[str]]:
     """Keep top productive because of allelic exclusion."""
-    """add consensus_count(vdj_contigs2) and its logfoldchange--240906Sun"""
-    """add consensus_count(vdj_contigs2) and its logfoldchange--240906Sun"""
     keep_contigs, extra_contigs, ambiguous_contigs = [], [], []
     counts = vdj_contigs.values()
     max_count = max(counts)
